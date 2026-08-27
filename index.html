@@ -47,15 +47,7 @@ input { font:inherit; }
   .monteure { grid-template-columns:1fr; }
 }
 </style>
-<style>
-.savedModal{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:100;padding:20px;display:flex;align-items:flex-end}
-.savedPanel{width:100%;max-width:700px;margin:auto;background:white;border-radius:16px;padding:14px;max-height:80vh;overflow:auto}
-.savedHead{display:flex;justify-content:space-between;align-items:center;font-size:18px;margin-bottom:10px}
-.savedHead button{border:0;background:transparent;font-size:30px;line-height:1}
-.savedEntry{display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid #ddd;border-radius:10px;padding:10px;margin:7px 0}
-.savedEntry button{min-height:42px;border:1px solid #d2d5d8;background:white;border-radius:9px;padding:7px 10px;font-weight:700}
-.savedEmpty{opacity:.6;padding:15px 0;text-align:center}
-</style></head>
+</head>
 <body>
 <div class="app">
   <div class="header">
@@ -82,16 +74,9 @@ input { font:inherit; }
 
   <div class="actions">
     <button class="action" id="save">Liste speichern</button>
-<button class="action" id="openSaved">Gespeicherte Listen</button>
     <button class="action" id="finish">Liste abschließen</button>
     <button class="action" id="new">Neue Liste</button>
     <button class="action" id="clear">Auswahl löschen</button>
-  </div>
-  <div id="savedModal" class="savedModal" hidden>
-    <div class="savedPanel">
-      <div class="savedHead"><strong>Gespeicherte Listen</strong><button type="button" id="closeSaved">×</button></div>
-      <div id="savedList"></div>
-    </div>
   </div>
 </div>
 
@@ -283,49 +268,7 @@ el("customDetails").addEventListener("toggle", () => {
 });
 el("clear").onclick = () => { quantities = {}; saveState(); renderItems(); };
 el("new").onclick = () => { quantities = {}; saveState(); renderItems(); };
-function collectListState(){
-  const custom = localStorage.getItem("materialliste_custom") || "[]";
-  const fields = {};
-  ["customer","m1n","m1h","m2n","m2h","m3n","m3h","m4n","m4h"].forEach(id => {
-    fields[id] = el(id).value || "";
-  });
-  return {quantities: JSON.parse(JSON.stringify(quantities)), custom: custom, fields: fields};
-}
-function restoreListState(state){
-  quantities = state.quantities || {};
-  if(state.fields) Object.keys(state.fields).forEach(id => { if(el(id)) el(id).value = state.fields[id] || ""; });
-  localStorage.setItem("materialliste_custom", state.custom || "[]");
-  saveState(); renderItems(); renderCustom();
-}
-function getSavedLists(){
-  try { return JSON.parse(localStorage.getItem("materialliste_saved") || "[]") || []; } catch(e) { return []; }
-}
-function setSavedLists(list){ localStorage.setItem("materialliste_saved", JSON.stringify(list)); }
-function renderSavedLists(){
-  const box=el("savedList"); box.innerHTML="";
-  const list=getSavedLists();
-  if(!list.length){box.innerHTML='<div class="savedEmpty">Noch keine Listen gespeichert.</div>';return;}
-  list.forEach((entry,i)=>{
-    const row=document.createElement("div"); row.className="savedEntry";
-    const info=document.createElement("div");
-    info.innerHTML="<strong>"+entry.name+"</strong><br><span style='opacity:.65;font-size:13px'>"+entry.date+"</span>";
-    const open=document.createElement("button"); open.type="button"; open.textContent="Öffnen";
-    const del=document.createElement("button"); del.type="button"; del.textContent="Löschen";
-    open.onclick=()=>{restoreListState(entry.state);el("savedModal").hidden=true;};
-    del.onclick=()=>{list.splice(i,1);setSavedLists(list);renderSavedLists();};
-    row.append(info,open,del);box.appendChild(row);
-  });
-}
-el("save").onclick=()=>{
-  const list=getSavedLists();
-  const customer=el("customer").value.trim();
-  const name=customer || "Liste "+(list.length+1);
-  list.unshift({name:name,date:new Date().toLocaleString("de-DE"),state:collectListState()});
-  setSavedLists(list); alert("Liste gespeichert."); 
-};
-el("openSaved").onclick=()=>{renderSavedLists();el("savedModal").hidden=false;};
-el("closeSaved").onclick=()=>{el("savedModal").hidden=true;};
-el("savedModal").addEventListener("click",e=>{if(e.target===el("savedModal"))el("savedModal").hidden=true;});
+el("save").onclick = () => { alert("Die aktuelle Auswahl ist auf diesem iPad gespeichert."); saveState(); };
 el("finish").onclick = () => { alert("Liste abgeschlossen."); saveState(); };
 
 loadState();
